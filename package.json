@@ -1,0 +1,37 @@
+{
+  "name": "nodejs-discord-musicbot",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "main": "index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint . --ext .js",
+    "prettier": "prettier -w \"./**/*.js\"",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opariffazman/nodejs-discord-musicbot.git"
+  },
+  "author": "opariffazman",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/opariffazman/nodejs-discord-musicbot/issues"
+  },
+  "homepage": "https://github.com/opariffazman/nodejs-discord-musicbot#readme",
+  "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "discord.js": "^14.11.0",
+    "ffmpeg-static": "^5.1.0",
+    "ytdl-core": "^4.11.4"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^17.6.5",
+    "@commitlint/config-conventional": "^17.6.5",
+    "eslint": "^8.43.0",
+    "eslint-config-prettier": "^8.8.0",
+    "husky": "^8.0.3",
+    "prettier": "^2.8.8"
+  }
+}
