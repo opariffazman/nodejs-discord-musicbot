@@ -58,22 +58,22 @@ async function playMusic(filePath, voiceChannel) {
   })
 
   const resource = createAudioResource(createReadStream(filePath), { inlineVolume: true })
-  const player = createAudioPlayer({
+  const audioPlayer = createAudioPlayer({
     behaviors: {
       noSubscriber: NoSubscriberBehavior.Pause
     }
   })
 
-  player.play(resource)
-  connection.subscribe(player)
+  audioPlayer.play(resource)
+  connection.subscribe(audioPlayer)
 
-  player.on('error', (error) => {
+  audioPlayer.on('error', (error) => {
     console.error(`Error: ${error.message} with resource ${error.resource}`)
     connection.destroy()
   })
 
-  player.on('idle', () => {
-    player.stop()
+  audioPlayer.on('idle', () => {
+    audioPlayer.stop()
     connection.destroy()
   })
 }
