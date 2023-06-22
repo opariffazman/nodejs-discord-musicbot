@@ -23,7 +23,8 @@ module.exports = {
       if (!voiceChannel) return interaction.reply('You need to be in a voice channel to use this command.')
 
       const info = await ytdl.getInfo(url)
-      const fileName = `${sanitize(info.videoDetails.title)}.mp3`
+      const title = sanitize(info.videoDetails.title)
+      const fileName = `${title}.mp3`
       const filePath = join(musicFolder, fileName)
 
       if (!existsSync(filePath)) {
@@ -41,7 +42,7 @@ module.exports = {
         playMusic(filePath, voiceChannel)
       }
 
-      return interaction.reply(`Now Playing: ${url}`)
+      return interaction.reply(`Now Playing: ${title}`)
     } catch (error) {
       console.error(error)
       return interaction.reply('Error playing the music.')
