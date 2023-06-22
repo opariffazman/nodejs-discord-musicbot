@@ -6,7 +6,7 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, NoSubscriberBe
 const { createReadStream, createWriteStream, existsSync } = require('fs')
 const { join } = require('path')
 const ytdl = require('ytdl-core')
-const sanitize = require('sanitize-fileName')
+const sanitize = require('sanitize-filename')
 const musicFolder = 'music'
 
 module.exports = {
