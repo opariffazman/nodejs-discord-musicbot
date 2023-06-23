@@ -13,6 +13,7 @@ module.exports = {
     if (!command) return
 
     try {
+      console.log(`interaction: ${interaction}`)
       await command.execute(interaction)
     } catch (error) {
       console.error(error)
