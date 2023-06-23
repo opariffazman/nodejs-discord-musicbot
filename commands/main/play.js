@@ -9,10 +9,43 @@ const ytdl = require('ytdl-core')
 const sanitize = require('sanitize-filename')
 const musicFolder = 'music'
 
+/**
+ * playMusic
+ * @param {string} filePath
+ * @param {string} voiceChannel 
+ */
+async function playMusic(filePath, voiceChannel) {
+  const connection = joinVoiceChannel({
+    channelId: voiceChannel.id,
+    guildId: voiceChannel.guild.id,
+    adapterCreator: voiceChannel.guild.voiceAdapterCreator
+  })
+
+  const resource = createAudioResource(createReadStream(filePath), { inlineVolume: true })
+  const audioPlayer = createAudioPlayer({
+    behaviors: {
+      noSubscriber: NoSubscriberBehavior.Pause
+    }
+  })
+
+  audioPlayer.play(resource)
+  connection.subscribe(audioPlayer)
+
+  audioPlayer.on('error', (error) => {
+    console.error(`Error: ${error.message} with resource ${error.resource}`)
+    connection.destroy()
+  })
+
+  audioPlayer.on('idle', () => {
+    audioPlayer.stop()
+    connection.destroy()
+  })
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('play')
-    .setDescription('Plays Music from YouTube Url!')
+    .setDescription('Plays Music from a YouTube Url!')
     .addStringOption((option) => option.setName('url').setDescription('Enter the YouTube Url').setRequired(true)),
   async execute(interaction) {
     const url = interaction.options.getString('url')
@@ -48,32 +81,4 @@ module.exports = {
       return interaction.reply('Error playing the music.')
     }
   }
-}
-
-async function playMusic(filePath, voiceChannel) {
-  const connection = joinVoiceChannel({
-    channelId: voiceChannel.id,
-    guildId: voiceChannel.guild.id,
-    adapterCreator: voiceChannel.guild.voiceAdapterCreator
-  })
-
-  const resource = createAudioResource(createReadStream(filePath), { inlineVolume: true })
-  const audioPlayer = createAudioPlayer({
-    behaviors: {
-      noSubscriber: NoSubscriberBehavior.Pause
-    }
-  })
-
-  audioPlayer.play(resource)
-  connection.subscribe(audioPlayer)
-
-  audioPlayer.on('error', (error) => {
-    console.error(`Error: ${error.message} with resource ${error.resource}`)
-    connection.destroy()
-  })
-
-  audioPlayer.on('idle', () => {
-    audioPlayer.stop()
-    connection.destroy()
-  })
 }
