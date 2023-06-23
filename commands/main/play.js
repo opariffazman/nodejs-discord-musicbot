@@ -36,9 +36,12 @@ async function playMusic(filePath, voiceChannel) {
     connection.destroy()
   })
 
-  audioPlayer.on('idle', () => {
-    audioPlayer.stop()
-    connection.destroy()
+  audioPlayer.on('stateChange', (oldState, newState) => {
+    console.log(`stateChange: ${oldState} => ${newState}`)
+
+    if (newState.status === 'idle') {
+      audioPlayer.stop()
+    }
   })
 }
 
