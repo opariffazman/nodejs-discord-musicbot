@@ -12,7 +12,7 @@ const musicFolder = 'music'
 /**
  * playMusic
  * @param {string} filePath
- * @param {string} voiceChannel 
+ * @param {string} voiceChannel
  */
 async function playMusic(filePath, voiceChannel) {
   const connection = joinVoiceChannel({
