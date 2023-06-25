@@ -87,7 +87,7 @@ const playAudio = async (audioPlayer, connection, filePath) => {
 
 /**
  * removeFromQueue
- * @param {*} filePath 
+ * @param {*} filePath
  */
 const removeFromQueue = (filePath) => {
   const index = queue.findIndex((song) => song.filePath === filePath)
@@ -98,8 +98,8 @@ const removeFromQueue = (filePath) => {
 
 /**
  * connectToChannel
- * @param {*} voiceChannel 
- * @returns 
+ * @param {*} voiceChannel
+ * @returns
  */
 const connectToChannel = async (voiceChannel) => {
   const connection = joinVoiceChannel({
