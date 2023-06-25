@@ -2,7 +2,7 @@
 // @ts-check
 
 const { SlashCommandBuilder } = require('discord.js')
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, NoSubscriberBehavior } = require('@discordjs/voice')
+const { joinVoiceChannel, entersState, VoiceConnectionStatus, createAudioPlayer, createAudioResource, NoSubscriberBehavior } = require('@discordjs/voice')
 const { OpusEncoder } = require('@discordjs/opus')
 const { createReadStream, createWriteStream, existsSync } = require('fs')
 const { join } = require('path')
@@ -18,7 +18,7 @@ const queue = []
  * @param {*} url
  * @param {*} filePath
  */
-async function downloadAudio(url, filePath) {
+const downloadAudio = async (url, filePath) => {
   console.log(`downloading ${filePath}`)
   const stream = ytdl(url, {
     filter: 'audioonly',
@@ -40,12 +40,12 @@ async function downloadAudio(url, filePath) {
 }
 
 /**
- * playMusic
+ * playAudio
  * @param {*} audioPlayer
  * @param {*} connection
  * @param {*} filePath
  */
-async function playMusic(audioPlayer, connection, filePath) {
+const playAudio = async (audioPlayer, connection, filePath) => {
   const audioStream = createReadStream(filePath)
   const opusEncoder = new OpusEncoder({ rate: 48000, channels: 2, frameSize: 960 })
   const resourceOptions = {
@@ -79,18 +79,50 @@ async function playMusic(audioPlayer, connection, filePath) {
       const nextSong = queue[0]
       if (nextSong) {
         const { audioPlayer: nextAudioPlayer, connection: nextConnection, filePath: nextFilePath } = nextSong
-        playMusic(nextAudioPlayer, nextConnection, nextFilePath)
+        playAudio(nextAudioPlayer, nextConnection, nextFilePath)
       }
     }
   })
 }
 
-function removeFromQueue(filePath) {
+/**
+ * removeFromQueue
+ * @param {*} filePath 
+ */
+const removeFromQueue = (filePath) => {
   const index = queue.findIndex((song) => song.filePath === filePath)
   if (index !== -1) {
     queue.splice(index, 1)
   }
 }
+
+/**
+ * connectToChannel
+ * @param {*} voiceChannel 
+ * @returns 
+ */
+const connectToChannel = async (voiceChannel) => {
+  const connection = joinVoiceChannel({
+    channelId: voiceChannel.id,
+    guildId: voiceChannel.guild.id,
+    adapterCreator: voiceChannel.guild.voiceAdapterCreator
+  })
+
+  try {
+    await entersState(connection, VoiceConnectionStatus.Ready, 30_000)
+    return connection
+  } catch (error) {
+    connection.destroy()
+    throw error
+  }
+}
+
+const audioPlayer = createAudioPlayer({
+  behaviors: {
+    noSubscriber: NoSubscriberBehavior.Pause,
+    maxMissedFrames: Math.round(5000 / 20)
+  }
+})
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -105,18 +137,7 @@ module.exports = {
 
       if (!voiceChannel) return interaction.reply('You need to be in a voice channel to use this command.')
 
-      const connection = joinVoiceChannel({
-        channelId: voiceChannel.id,
-        guildId: voiceChannel.guild.id,
-        adapterCreator: voiceChannel.guild.voiceAdapterCreator
-      })
-
-      const audioPlayer = createAudioPlayer({
-        behaviors: {
-          noSubscriber: NoSubscriberBehavior.Pause
-        }
-      })
-
+      const connection = await connectToChannel(voiceChannel)
       const info = await ytdl.getInfo(url)
       const title = sanitize(info.videoDetails.title)
       const fileName = `${title}.mp3`
@@ -137,13 +158,8 @@ module.exports = {
       if (queue.length === 1 && audioPlayer.state.status !== 'playing') {
         console.log(`started playing ${fileName}`)
         playStatus = 'Now Playing'
-        playMusic(audioPlayer, connection, filePath)
-      } else {
-        console.log(`added ${fileName} to queue`)
-        playStatus = 'Added to Queue'
-      }
-
-      console.log(queue)
+        playAudio(audioPlayer, connection, filePath)
+      } else playStatus = 'Added to Queue'
 
       return interaction.reply(`${playStatus}: ${title}`)
     } catch (error) {
