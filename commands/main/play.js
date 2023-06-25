@@ -15,8 +15,8 @@ const queue = []
 
 /**
  * downloadAudio
- * @param {*} url 
- * @param {*} filePath 
+ * @param {*} url
+ * @param {*} filePath
  */
 async function downloadAudio(url, filePath) {
   console.log(`downloading ${filePath}`)
